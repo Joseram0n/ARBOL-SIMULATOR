@@ -15,9 +15,13 @@ SplashScreen splash;
 Menu menu;
 enum EstadosMenu {PRINCIPAL,ARBOL,AJUSTES};
 EstadosMenu estadoMenu;
-GView vista2D, vista3D;
+GView vista2D;
+GViewPeasyCam vista3D;
 String tituloVentana = "Arbol Simulator 2020";
 boolean musicaSilenciada;
+LSystem arbolSys;
+Arbol2D a2d;
+Arbol3D a3d;
 
 //Settings se ejecuta antes que la api de processing
 //Establece que la ventana se abre al 80% de la resolucion del monitor
@@ -44,11 +48,14 @@ void setup(){
   smooth();
   frameRate(60);
   menu.iniGUI();
-  menu.setMusicaMenu(true);
+  //menu.setMusicaMenu(true);
   //Vista de Arboles 2D y 3D
-  Arbol2D a2d = new Arbol2D();
+  arbolSys = new LSystem();
+  
+  a2d = new Arbol2D();
   vista2D.addListener(a2d);
-  Arbol3D a3d = new Arbol3D();
+
+  a3d = new Arbol3D(vista3D.getPeasyCam());
   vista3D.addListener(a3d);
   //Cerrar pantalla carga
   splash.cerrar();
@@ -58,7 +65,6 @@ void setup(){
 void draw(){
   //Dibuja dependiendo del estado
   background(0);
-  //delay(800);
   switch(estadoMenu){
     case PRINCIPAL:
       menu.menuPrincipal();
@@ -74,7 +80,7 @@ void draw(){
       exit();
   }
   surface.setTitle(tituloVentana + " - FPS: " + frameRate);
-  println("ESTADO MENU: " + estadoMenu);
+  println("ESTADO MENU: " + estadoMenu); 
 }
 
 //Eventos de teclas presionadas
@@ -95,7 +101,27 @@ void keyPressed(){
        if(estadoMenu == EstadosMenu.PRINCIPAL || estadoMenu == EstadosMenu.AJUSTES)
          menu.setMusicaMenu(!menu.getEstadoMusicaMenu());
      }
-     
+
+     if(key == 'g' || key == 'G'){
+       arbolSys.guardar();
+     }
+
+     if(key == 'c' || key == 'C'){
+       arbolSys = new LSystem();
+       arbolSys.cargar();
+       arbolSys.genera();
+       while(arbolSys.getResultado().size() < 1){
+         delay(200);
+         arbolSys.genera();  
+       }
+       a3d.updateArbolView(arbolSys);
+     }
+
+     if(key == 'e' || key == 'e'){
+       boolean[] test = arbolSys.getEsqueletoEstado();
+       arbolSys.setEsqueletoEstado(!test[0],0);
+       
+     }
    }
    
   println("Tecla Presionada: " + key);
