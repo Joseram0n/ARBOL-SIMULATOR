@@ -1,0 +1,10 @@
+Este proyecto es una practica
+de la asignatura "Realidad Virtual"
+perteneciente al grado de Ing. Informatica
+de la universidad de Huelva (UHU).
+===[  AUTORES  ] ===
+- Jose Ramon Lopez Garrido.
+- Daniel Perez Rodriguez.
+ ===[  INFORMACION GENERAL  ] ===
+Hecho con Processing 3.5.1 y las
+librerias de Audio y G4P.
