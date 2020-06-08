@@ -164,12 +164,13 @@ public class LSystem {
   			println("User selected " + selection.getAbsolutePath());
   			try{
   			LSystem temp = new Gson().fromJson(new FileReader(selection.getAbsolutePath()), LSystem.class);
-
+			
   			this.niveles = temp.getIteraciones();
   			this.axioma = temp.getAxioma();
   			this.grosor = temp.getGrosor();
   			this.angulo = temp.getAngulo();
   			this.reglas = temp.getReglas();
+			this.largo = temp.getLargo();
 			this.larDec = temp.getDecrecimientoLongitud();
 			this.groDec = temp.getDecreciemientoGrosor();
 		
@@ -184,9 +185,11 @@ public class LSystem {
 			this.arbolFinal = null;
 
 			genera();
-
+			
+			//LSystem nuevo = new LSystem(,,);
+			//LSystem(temp.getIteraciones(),temp.getAxioma(),temp.getGrosor(),temp.getAngulo(),float lar,ArrayList<LSRegla> r,float dl,float dg)
 			//TESTING
-			//a3d.updateArbolView(this);
+			a3d.updateArbolView(this);
 
   			} catch (IOException e) {
           		e.printStackTrace();
