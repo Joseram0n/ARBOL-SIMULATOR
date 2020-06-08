@@ -36,5 +36,21 @@ El proyecto consiste en crear una representacion de un arbol en 2D y 3D.
 - [ ] (OPCIONAL) Crear bosque con musica :question:
 - [ ] (OPCIONAL) Añadir animacion 2D/3D :question:
 
+### REFERENCIAS:
+
+* [Ejemplo Processing 2D](https://processing.org/examples/tree.html)
+
+* [Libro The Algorithmic Beauty of Plants](http://algorithmicbotany.org/papers/abop/abop.pdf)
 
 
+* [Paper Sobre L-System](https://www.bioquest.org/products/files/13157_Real-time%203D%20Plant%20Structure%20Modeling%20by%20L-System.pdf)
+
+* [Proyecto L-System Universidad WISCONSIN–MADISON](http://pages.cs.wisc.edu/~yu-chi/Course/CS777/yuchitech.htm)
+
+* [Libro Nature of Code by Daniel Shiffman](https://natureofcode.com/book/chapter-8-fractals/)
+
+* [Wiki L-System](https://es.wikipedia.org/wiki/Sistema-L)
+
+* [Wiki traduccion L-System 1](https://es.qwe.wiki/wiki/L-system)
+
+* [Ejemplos L-System by Paul Bourke](http://paulbourke.net/fractals/lsys)

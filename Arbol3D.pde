@@ -20,6 +20,7 @@ invalidate(); hace llamada al metodo draw()
     //Constructor
     public Arbol3D (PeasyCam pcam) {
         this.pcam = pcam;
+
         this.ls = arbolSys;
         this.v = (PGraphics3D) getGraphics();
 
@@ -30,7 +31,7 @@ invalidate(); hace llamada al metodo draw()
         ArrayList<LSRegla> reg = new ArrayList<LSRegla>();
         reg.add(r);
         reg.add(r1);
-        ls = new LSystem(4,"FA",5.0,35.0,30.0,reg,0.95,0.95);
+        ls = new LSystem(4,"FA",5.0,35.0,30.0,reg,0.8,0.8);
         //ls = new LSystem(2,"F",3.0,35.0,50.0,reg);
         ls.genera();
         
@@ -46,7 +47,7 @@ invalidate(); hace llamada al metodo draw()
         v.beginDraw();
         //A partir de aqui se puede dibujar en el buffer
         v.resetMatrix();
-        v.lights();
+        v.lights(); //Luces ;)
         v.background(20, 20, 120);
         v.translate(width()/2,height()/2);
         pcam.feed();
@@ -63,16 +64,14 @@ invalidate(); hace llamada al metodo draw()
         
         v.stroke(0);
 
-
         ls.dibuja(v);
-
 
         v.endDraw();
 
         //Solo se ejecuta la primera vez
         if(primerValidate == false){
             validate(); // No se necesita, siempre se refresca,pero para optimizar el buffer se deja
-            pcam.setDistance(300);
+            //pcam.setDistance(300); //Testing distancia ideal
             primerValidate = true;
         }
 
@@ -87,7 +86,10 @@ invalidate(); hace llamada al metodo draw()
     }
     
     public void updateArbolView(LSystem nuevo){
-      this.ls = nuevo;
+        this.pcam.reset();
+        this.ls = nuevo;
+        primerValidate = false;
+        invalidate();
     }
 
 

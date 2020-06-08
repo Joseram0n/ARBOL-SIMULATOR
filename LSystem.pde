@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import com.google.gson.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Stack;
 import java.io.*;
 
 /**
@@ -18,31 +17,35 @@ public class LSystem {
 	float grosor; // grosor para ramas
 	float angulo; //angulo para turn,pitch y roll
 	float largo; // longitud inicial
-  float groDec; // decrecimiento de grosor
-  float larDec; // decreciemiento largo
-  ArrayList<LSRegla> reglas; // conjunto de reglas
+	float groDec; // decrecimiento de grosor
+	float larDec; // decreciemiento largo
+	ArrayList<LSRegla> reglas; // conjunto de reglas
 	transient ArrayList<String> resultado; // resultado arlacenado
 	transient LSTortuga tortuga; // tortuga de dibujado
 	transient PShape arbolFinal;
 	transient boolean cambio;
 	transient boolean[] esqueleto;
+	transient Stack<Float> pilaGro;
+  	transient Stack<Float> pilaLar;
 
 	public LSystem(){
-    this.niveles =  0;
-    this.axioma = new String();
-    this.grosor = 0.0;
-    this.angulo = 0.0;
-    this.largo = 0.0;
-    this.reglas = new ArrayList<LSRegla>();
-    this.resultado = new ArrayList<String>();
-    this.tortuga = new LSTortuga();
-    this.cambio = true;
-    this.esqueleto = new boolean[2];
-    this.esqueleto[0] = false;
-    this.esqueleto[1] = false;
-    this.larDec = 1.0;
-    this.groDec = 1.0;
-  }
+		this.niveles =  0;
+		this.axioma = new String();
+		this.grosor = 0.0;
+		this.angulo = 0.0;
+		this.largo = 0.0;
+		this.reglas = new ArrayList<LSRegla>();
+		this.resultado = new ArrayList<String>();
+		this.tortuga = new LSTortuga();
+		this.cambio = false;
+		this.esqueleto = new boolean[2];
+		this.esqueleto[0] = false;
+		this.esqueleto[1] = false;
+		this.larDec = 1.0;
+		this.groDec = 1.0;
+		pilaGro = new Stack<Float>();
+		pilaLar = new Stack<Float>();
+  	}
 
 	public LSystem(int n,String axi,float g,float ang,float lar,ArrayList<LSRegla> r,float dl,float dg){
 		this.niveles =  n;
@@ -53,12 +56,14 @@ public class LSystem {
 		this.reglas = r;
 		this.resultado = new ArrayList<String>();
 		this.tortuga = new LSTortuga();
-		this.cambio = true;
+		this.cambio = false;
 		this.esqueleto = new boolean[2];
 		this.esqueleto[0] = false;
 		this.esqueleto[1] = false;
-    this.larDec = dl;
-    this.groDec = dg;
+		this.larDec = dl;
+		this.groDec = dg;
+		pilaGro = new Stack<Float>();
+		pilaLar = new Stack<Float>();
 	}
 
 	public int getIteraciones(){
@@ -117,21 +122,21 @@ public class LSystem {
 		return esqueleto;
 	}
 
-  public void setDecrecimientoLongitud(float dl){
-    this.larDec = dl;
-  }
-  
-  public void setDecreciemientoGrosor(float dg){
-    this.groDec = dg;
-  }
-  
-  public float getDecrecimientoLongitud(){
-    return this.larDec;
-  }
-  
-  public float getDecreciemientoGrosor(){
-    return this.groDec;
-  }
+	public void setDecrecimientoLongitud(float dl){
+		this.larDec = dl;
+	}
+	
+	public void setDecreciemientoGrosor(float dg){
+		this.groDec = dg;
+	}
+	
+	public float getDecrecimientoLongitud(){
+		return this.larDec;
+	}
+	
+	public float getDecreciemientoGrosor(){
+		return this.groDec;
+	}
 
 	public void setEsqueletoEstado(boolean estado,int tipo){
 		if(tipo < 2){
@@ -159,16 +164,33 @@ public class LSystem {
   			println("User selected " + selection.getAbsolutePath());
   			try{
   			LSystem temp = new Gson().fromJson(new FileReader(selection.getAbsolutePath()), LSystem.class);
+
   			this.niveles = temp.getIteraciones();
   			this.axioma = temp.getAxioma();
   			this.grosor = temp.getGrosor();
   			this.angulo = temp.getAngulo();
   			this.reglas = temp.getReglas();
-        this.larDec = temp.getDecrecimientoLongitud();
-        this.groDec = temp.getGrosor();
+			this.larDec = temp.getDecrecimientoLongitud();
+			this.groDec = temp.getDecreciemientoGrosor();
+		
+			this.resultado = new ArrayList<String>();
+			this.tortuga = new LSTortuga();
+			this.cambio = false;
+			this.esqueleto = new boolean[2];
+			this.esqueleto[0] = false;
+			this.esqueleto[1] = false;
+			this.pilaGro = new Stack<Float>();
+			this.pilaLar = new Stack<Float>();
+			this.arbolFinal = null;
+
+			genera();
+
+			//TESTING
+			//a3d.updateArbolView(this);
+
   			} catch (IOException e) {
           		e.printStackTrace();
-     			}
+     		}
   		}
   	}
 
@@ -184,7 +206,7 @@ public class LSystem {
 				writer.close();	
 			}catch (IOException e) {
 				e.printStackTrace();
-   		}
+   			}
 		}
 	}
 
@@ -196,40 +218,44 @@ public class LSystem {
 		out = out + "\nGrosor: " + this.grosor;
 		out = out + "\nAngulo: " + this.angulo;
 		out = out + "\nReglas: " + this.reglas.toString();
+		out = out + "\nLargo: " + this.largo;
+		out = out + "\n(%)Decrecimiento Grosor: " + this.groDec;
+		out = out + "\n(%)Decrecimiento Largo: " + this.larDec;
+		out = out + "\nResultado: " + this.resultado;
 		return out;
 	}
 
 	public void genera(){
-    if(reglas.size() >= 1){
-  		resultado.add(axioma);
-  		String temp = "";
-  		for(int i = 0; i < niveles; i++){ //itera por cada nivel
-  			for(int j = 0; j < resultado.get(i).length(); j++){ // itera por cada char de resultado anterior
-  				boolean reglaEcontrada = false;
-  				char c = resultado.get(i).charAt(j);
-  				for(int k = 0; k < reglas.size();k++){ // comparar con reglas
-  					if(c == reglas.get(k).getVar().charAt(0)){
-  						//temp = temp.replace(reglas.get(k).getVar(),reglas.get(k).getRegla());
-  						temp = temp + reglas.get(k).getRegla();
-  						reglaEcontrada = true;
-  					}
-  				}
-  				if(reglaEcontrada == false){
-  					temp = temp + c;
-  				}
-  			}
-  			resultado.add(temp);
-  			temp = "";
-  		}
-  		cambio = true;
-    }
+		if(reglas.size() >= 1){
+			resultado.add(axioma);
+			String temp = "";
+			for(int i = 0; i < niveles; i++){ //itera por cada nivel
+				for(int j = 0; j < resultado.get(i).length(); j++){ // itera por cada char de resultado anterior
+					boolean reglaEcontrada = false;
+					char c = resultado.get(i).charAt(j);
+					for(int k = 0; k < reglas.size();k++){ // comparar con reglas
+						if(c == reglas.get(k).getVar().charAt(0)){
+							//temp = temp.replace(reglas.get(k).getVar(),reglas.get(k).getRegla());
+							temp = temp + reglas.get(k).getRegla();
+							reglaEcontrada = true;
+						}
+					}
+					if(reglaEcontrada == false){
+						temp = temp + c;
+					}
+				}
+				resultado.add(temp);
+				temp = "";
+			}
+			cambio = true;
+		}
 	}
 
 	public void dibuja(PGraphics v){
 		if(resultado != null){
-			if(cambio != true){
+			if(cambio == false){
 				v.shape(arbolFinal);
-			} else{
+			} else {
 				for(int i = resultado.size()-1; i < resultado.size();i++){
 					String temp = resultado.get(i);
 					tortuga = new LSTortuga(v,this.largo,this.angulo,this.grosor,this.esqueleto); 
@@ -243,7 +269,7 @@ public class LSystem {
 								lar = lar * larDec;
 								gro = gro * groDec;
 							case 'G':
-								//tortuga.move(param);
+								//tortuga.mueve(param);
 								break;
 							//Orientacion
 							case '+':
@@ -264,16 +290,20 @@ public class LSystem {
 							case '/':
 								tortuga.rotaDerecha(angulo);
 								break;
-							case '<': //increase diameter
+							case '<': //incrementar diametro
 							case '>':
 							case '|':
-								//tortuga.turn180(param);
+								//tortuga.gira180(param);
 								break;
 							//Estructura
 							case '[':
+							    pilaLar.push(lar);
+                				pilaGro.push(gro);
 								tortuga.guarda();
 								break;
 							case ']':
+								lar = pilaLar.pop();
+                				gro = pilaGro.pop();
 								tortuga.restaura();
 								break;
 							//Crecimiento/Decrecimiento
