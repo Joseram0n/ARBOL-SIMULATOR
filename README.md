@@ -7,7 +7,7 @@ ___
 ## Informacion sobre el proyecto
 El proyecto consiste en crear una representacion de un arbol en 2D y 3D.
 
-Para mas información miarar la documentación de la wiki: [WIKI](https://github.com/Joseram0n/ARBOL-SIMULATOR/wiki)
+Para mas información mirar la documentación de la wiki: [WIKI](https://github.com/Joseram0n/ARBOL-SIMULATOR/wiki)
 
 ## Requisitos
 
