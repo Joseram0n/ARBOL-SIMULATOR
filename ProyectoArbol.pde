@@ -2,6 +2,7 @@
   Esta pagina del Sketch es la principal
   
   Author: Jose Ramon Lopez Garrido
+  Co-Author: Daniel Perez Rodriguez
  */
  
 //Importacion de librerias
